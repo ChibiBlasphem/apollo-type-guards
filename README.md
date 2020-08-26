@@ -1,0 +1,1 @@
+# Apollo Type Guard
