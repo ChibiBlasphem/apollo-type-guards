@@ -1,6 +1,6 @@
 import { parse } from '@babel/parser'
 import * as types from '@babel/types'
-import { GraphQLTypeInfo } from './types'
+import { GraphQLTypeInfo, GRAPHQL_OBJECT_PROPERTY } from './types'
 
 type TSTypeDeclaration = types.TSInterfaceDeclaration | types.TSTypeAliasDeclaration
 
@@ -56,7 +56,7 @@ const isTypenameProperty = (
   return (
     types.isTSPropertySignature(property) &&
     types.isIdentifier(property.key) &&
-    property.key.name === '__typename' &&
+    property.key.name === GRAPHQL_OBJECT_PROPERTY &&
     types.isTSTypeAnnotation(property.typeAnnotation) &&
     types.isTSLiteralType(property.typeAnnotation.typeAnnotation) &&
     types.isStringLiteral(property.typeAnnotation.typeAnnotation.literal)
@@ -87,7 +87,7 @@ const extractTypename = (type: TSTypeDeclaration): string => {
   let typename: string | undefined
   if (!typenameProperty || !(typename = extractTypenameValue(typenameProperty.typeAnnotation))) {
     throw new Error(
-      `Type ${type.id.name} should have a property __typename which has a const string value`
+      `Type ${type.id.name} should have a property ${GRAPHQL_OBJECT_PROPERTY} which has a const string value`
     )
   }
 

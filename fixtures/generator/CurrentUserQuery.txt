@@ -1,0 +1,7 @@
+import { CurrentUserQuery_currentUser } from "../CurrentUserQuery.ts";
+interface GqlObject<T extends string = string> {
+  __typename: T;
+}
+export const isUser = (gqlObject: object | GqlObject | null | undefined): gqlObject is CurrentUserQuery_currentUser => {
+  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User";
+};

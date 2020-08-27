@@ -1,0 +1,10 @@
+import { PostQuery_post_comments, PostQuery_post } from "../PostQuery.ts";
+interface GqlObject<T extends string = string> {
+  __typename: T;
+}
+export const isComment = (gqlObject: object | GqlObject | null | undefined): gqlObject is PostQuery_post_comments => {
+  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Comment";
+};
+export const isPost = (gqlObject: object | GqlObject | null | undefined): gqlObject is PostQuery_post => {
+  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Post";
+};

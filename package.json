@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "main": "lib/index.js",
   "bin": {
-    "apollo-types-guard": "./bin/apollo-types-guard"
+    "apollo-types-guard": "./bin/cli.js"
   },
   "repository": "git@github.com:ChibiBlasphem/apollo-types-guard.git",
   "author": "Christopher Debove <chibiblasphem@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "babel src --out-dir lib --extensions .ts,.js --ignore='src/__tests__'"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
@@ -24,6 +25,8 @@
   "dependencies": {
     "@babel/generator": "^7.11.4",
     "@babel/parser": "^7.11.4",
-    "@babel/types": "^7.11.0"
+    "@babel/types": "^7.11.0",
+    "glob": "^7.1.6",
+    "yargs": "^15.4.1"
   }
 }

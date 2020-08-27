@@ -1,7 +1,7 @@
 import { generateGuards } from '../generator'
 
-const userFixture = loadFixture('guardCurrentUserQuery')
-const postFixture = loadFixture('guardPostQuery')
+const userFixture = loadFixture('generator/CurrentUserQuery')
+const postFixture = loadFixture('generator/PostQuery')
 
 const oneType = [{ name: 'CurrentUserQuery_currentUser', typename: 'User' }]
 
@@ -12,7 +12,7 @@ const manyTypes = [
 
 describe('generateGuards', () => {
   it('Should generate guard for each graphQL type info', () => {
-    expect(generateGuards(oneType)).toBe(userFixture)
-    expect(generateGuards(manyTypes)).toBe(postFixture)
+    expect(generateGuards('CurrentUserQuery.ts', oneType)).toBe(userFixture)
+    expect(generateGuards('PostQuery.ts', manyTypes)).toBe(postFixture)
   })
 })
