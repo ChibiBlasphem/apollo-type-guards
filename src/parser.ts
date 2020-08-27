@@ -1,10 +1,7 @@
 import { parse } from '@babel/parser'
 import * as types from '@babel/types'
+import { GraphQLTypeInfo } from './types'
 
-type GraphQLTypeInfo = {
-  name: string
-  typename: string
-}
 type TSTypeDeclaration = types.TSInterfaceDeclaration | types.TSTypeAliasDeclaration
 
 export const extractGraphQLTypes = (code: string): GraphQLTypeInfo[] => {

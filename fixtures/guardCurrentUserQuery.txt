@@ -1,0 +1,4 @@
+interface GqlObject<T extends string = string> {
+  __typename: T;
+}
+export const isUser = (gqlObject: GqlObject): gqlObject is CurrentUserQuery_currentUser => gqlObject.__typename === "User";

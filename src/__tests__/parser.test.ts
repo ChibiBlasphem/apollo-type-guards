@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs'
 import { extractGraphQLTypes } from '../parser'
 
-const userFixture = loadFixture('CurrentUserQuery.ts')
-const postFixture = loadFixture('PostQuery.ts')
+const userFixture = loadFixture('CurrentUserQuery')
+const postFixture = loadFixture('PostQuery')
 
 describe('extractGraphQLTypes', () => {
   it('Should return an array of the types containing a property "__typename"', () => {
