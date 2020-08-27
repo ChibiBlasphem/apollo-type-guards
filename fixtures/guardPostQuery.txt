@@ -1,0 +1,5 @@
+interface GqlObject<T extends string = string> {
+  __typename: T;
+}
+export const isComment = (gqlObject: GqlObject): gqlObject is PostQuery_post_comments => gqlObject.__typename === "Comment";
+export const isPost = (gqlObject: GqlObject): gqlObject is PostQuery_post => gqlObject.__typename === "Post";
