@@ -1,0 +1,9 @@
+export type UnionedQuery_search = {
+  __typename: 'User' | 'Repository'
+  id: string
+  name: string
+}
+
+export type UnionedQuery = {
+  search: UnionedQuery_post[]
+}
