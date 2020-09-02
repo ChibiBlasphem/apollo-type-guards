@@ -1,0 +1,68 @@
+version: 2.1
+
+# ------------------------------
+# Parameters
+# ------------------------------
+
+parameters:
+  cache-version:
+    type: string
+    default: v6
+
+# ------------------------------
+# Executor
+# ------------------------------
+
+executors:
+  node:
+    working_directory: ~/repo
+    docker:
+    - image: circleci/node:12.16
+
+# ------------------------------
+# Commands
+# ------------------------------
+
+commands:
+  checkout-and-restore-cache:
+    steps:
+    - checkout
+    - restore_cache:
+        key: &cache-key << pipeline.parameters.cache-version >>-node12-dependencies-{{ arch }}-{{ checksum "./yarn.lock" }}
+
+# ------------------------------
+# Jobs
+# ------------------------------
+
+jobs:
+  dependencies:
+    executor: node
+    steps:
+    - checkout-and-restore-cache
+    - run:
+        name: Install dependencies
+        command: yarn --prefer-offline --pure-lockfile --ignore-engines
+    - save_cache:
+        paths:
+          - ./node_modules
+        key: *cache-key
+
+  unit-test:
+    executor: node
+    steps:
+    - checkout-and-restore-cache
+    - run:
+        name: Run tests
+        command: yarn test
+
+# ------------------------------
+# Workflow
+# ------------------------------
+
+workflows:
+  main-workflow:
+    jobs:
+    - dependencies
+    - unit-test:
+        requires:
+          - dependencies
