@@ -104,3 +104,6 @@ workflows:
         - unit-test
         - lint
         - hold-release
+        filters:
+          branches:
+            only: master
