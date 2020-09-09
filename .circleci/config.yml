@@ -30,6 +30,12 @@ commands:
     - restore_cache:
         key: &cache-key << pipeline.parameters.cache-version >>-node12-dependencies-{{ arch }}-{{ checksum "./yarn.lock" }}
 
+  set-git-write-access:
+    steps:
+    - run:
+        name: Setup git origin with write access
+        command: git remote set-url origin "https://$GITHUB_TOKEN@github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+
 # ------------------------------
 # Jobs
 # ------------------------------
@@ -44,7 +50,7 @@ jobs:
         command: yarn --prefer-offline --pure-lockfile --ignore-engines
     - save_cache:
         paths:
-          - ./node_modules
+        - ./node_modules
         key: *cache-key
 
   unit-test:
@@ -54,6 +60,24 @@ jobs:
     - run:
         name: Run tests
         command: yarn test
+
+  lint:
+    executor: node
+    steps:
+    - checkout-and-restore-cache
+    - run:
+        name: Run eslint
+        command: yarn lint
+
+  release:
+    executor: node
+    steps:
+    - checkout-and-restore-cache
+    - set-git-write-access
+    - run:
+        name: Create release
+        command: yarn semantic-release
+
 
 # ------------------------------
 # Workflow
@@ -65,4 +89,18 @@ workflows:
     - dependencies
     - unit-test:
         requires:
-          - dependencies
+        - dependencies
+    - lint:
+        requires:
+        - dependencies
+    - hold-release:
+        type: approval
+    - release:
+        context: NpmReleasePublish
+        requires:
+        - unit-test
+        - lint
+        - hold-release
+        filters:
+          branches:
+            only: master
