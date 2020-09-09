@@ -72,6 +72,7 @@ jobs:
   build:
     executor: node
     steps:
+    - checkout-and-restore-cache
     - run:
         name: Build sources
         command: yarn build
