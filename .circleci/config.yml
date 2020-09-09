@@ -76,7 +76,7 @@ jobs:
         name: Build sources
         command: yarn build
     - persist_to_workspace:
-        root: .
+        root: ~/repo
         paths:
         - lib
 
@@ -85,7 +85,7 @@ jobs:
     steps:
     - checkout-and-restore-cache
     - attach_workspace:
-        at: .
+        at: ~/repo
     - set-git-write-access
     - run:
         name: Create release
