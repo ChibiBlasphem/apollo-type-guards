@@ -69,10 +69,23 @@ jobs:
         name: Run eslint
         command: yarn lint
 
+  build:
+    executor: node
+    steps:
+    - run:
+        name: Build sources
+        command: yarn build
+    - persist_to_workspace:
+        root: .
+        paths:
+        - lib
+
   release:
     executor: node
     steps:
     - checkout-and-restore-cache
+    - attach_workspace:
+        at: .
     - set-git-write-access
     - run:
         name: Create release
@@ -93,6 +106,9 @@ workflows:
     - lint:
         requires:
         - dependencies
+    - build:
+        requires:
+        - dependencies
     - hold-release:
         type: approval
         filters:
@@ -103,6 +119,7 @@ workflows:
         requires:
         - unit-test
         - lint
+        - build
         - hold-release
         filters:
           branches:
