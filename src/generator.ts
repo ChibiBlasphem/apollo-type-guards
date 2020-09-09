@@ -1,14 +1,14 @@
 import * as types from '@babel/types'
-import { parse, parseExpression } from '@babel/parser'
 import generate from '@babel/generator'
 import { GraphQLTypeInfo, GUARD_PARAM_NAME, GRAPHQL_OBJECT_PROPERTY } from './types'
-import { type } from 'os'
 
 const buildGuardParam = (): types.Identifier => {
   const param = types.identifier(GUARD_PARAM_NAME)
 
+  // Accepting params types : (gqlObject: void | object | GqlObject | null | undefined)
   param.typeAnnotation = types.tsTypeAnnotation(
     types.tsUnionType([
+      types.tsVoidKeyword(),
       types.tsObjectKeyword(),
       types.tsTypeReference(types.identifier('GqlObject')),
       types.tsNullKeyword(),
@@ -20,21 +20,27 @@ const buildGuardParam = (): types.Identifier => {
 }
 
 const buildCondition = ({ typename }: GraphQLTypeInfo): types.LogicalExpression => {
+  // cond: !!gqlObject
   const isDefinedExpression = types.unaryExpression(
     '!',
     types.unaryExpression('!', types.identifier(GUARD_PARAM_NAME))
   )
+
+  // cond: '__typename' in gqlObject
   const hasTypenamePropExpression = types.binaryExpression(
     'in',
     types.stringLiteral(GRAPHQL_OBJECT_PROPERTY),
     types.identifier(GUARD_PARAM_NAME)
   )
+
+  // cond: gqlObject.__typename === {typename}
   const typenameEqualsString = types.binaryExpression(
     '===',
     types.memberExpression(types.identifier(GUARD_PARAM_NAME), types.identifier('__typename')),
     types.stringLiteral(typename)
   )
 
+  // isDefinedExpression && hasTypenamePropExpression && typenameEqualsString
   return types.logicalExpression(
     '&&',
     types.logicalExpression('&&', isDefinedExpression, hasTypenamePropExpression),
