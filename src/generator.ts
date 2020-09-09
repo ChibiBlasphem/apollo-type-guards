@@ -99,7 +99,7 @@ const buildGqlObjectInterface = () => {
   )
 }
 
-export const generateGuards = (filename: string, graphQLTypes: GraphQLTypeInfo[]) => {
+export const generateGuards = (filename: string, graphQLTypes: GraphQLTypeInfo[]): string => {
   const guardsAst: types.Statement[] = graphQLTypes.map(buildNamedExport)
   const importDeclaration = buildImportDeclaration(
     filename,

@@ -10,16 +10,48 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
+    "lint": "eslint . --ext '.js,.ts'",
     "build": "babel src --out-dir lib --extensions .ts,.js --ignore='src/__tests__'"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint . --fix",
+      "prettier --write",
+      "jest --findRelatedTests"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "yarn test",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.4",
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-typescript": "^7.10.4",
+    "@commitlint/cli": "^9.1.2",
+    "@commitlint/config-conventional": "^9.1.2",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/github": "^7.1.1",
+    "@semantic-release/npm": "^7.0.6",
+    "@semantic-release/release-notes-generator": "^9.0.1",
     "@types/jest": "^26.0.10",
     "@types/node": "^14.6.0",
+    "@typescript-eslint/eslint-plugin": "^4.1.0",
+    "@typescript-eslint/parser": "^4.1.0",
+    "eslint": "^7.8.1",
+    "eslint-config-node": "^4.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.3.0",
     "jest": "^26.4.2",
+    "lint-staged": "^10.3.0",
+    "prettier": "^2.1.1",
+    "semantic-release": "^17.1.1",
     "typescript": "^4.0.2"
   },
   "dependencies": {
