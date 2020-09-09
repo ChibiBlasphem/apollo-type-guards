@@ -1,8 +1,6 @@
 import * as types from '@babel/types'
-import { parse, parseExpression } from '@babel/parser'
 import generate from '@babel/generator'
 import { GraphQLTypeInfo, GUARD_PARAM_NAME, GRAPHQL_OBJECT_PROPERTY } from './types'
-import { type } from 'os'
 
 const buildGuardParam = (): types.Identifier => {
   const param = types.identifier(GUARD_PARAM_NAME)
@@ -93,7 +91,7 @@ const buildGqlObjectInterface = () => {
   )
 }
 
-export const generateGuards = (filename: string, graphQLTypes: GraphQLTypeInfo[]) => {
+export const generateGuards = (filename: string, graphQLTypes: GraphQLTypeInfo[]): string => {
   const guardsAst: types.Statement[] = graphQLTypes.map(buildNamedExport)
   const importDeclaration = buildImportDeclaration(
     filename,

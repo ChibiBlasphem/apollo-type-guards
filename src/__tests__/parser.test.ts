@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs'
 import { extractGraphQLTypes } from '../parser'
 
 const userFixture = loadFixture('parser/CurrentUserQuery')
