@@ -1,10 +1,14 @@
 {
-  "name": "apollo-type-guard",
+  "name": "apollo-type-guards",
   "version": "1.0.0",
   "main": "lib/index.js",
   "bin": {
-    "apollo-types-guard": "./bin/cli.js"
+    "apollo-type-guards": "./bin/cli.js"
   },
+  "files": [
+    "lib",
+    "bin"
+  ],
   "repository": "git@github.com:ChibiBlasphem/apollo-types-guard.git",
   "author": "Christopher Debove <chibiblasphem@gmail.com>",
   "license": "MIT",
