@@ -95,12 +95,12 @@ workflows:
         - dependencies
     - hold-release:
         type: approval
+        filters:
+          branches:
+            only: master
     - release:
         context: NpmReleasePublish
         requires:
         - unit-test
         - lint
         - hold-release
-        filters:
-          branches:
-            only: master
