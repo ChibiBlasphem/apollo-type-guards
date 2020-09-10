@@ -2,9 +2,13 @@ import { PostQuery_post_comments, PostQuery_post } from "../PostQuery.ts";
 interface GqlObject<T extends string = string> {
   __typename: T;
 }
-export const isComment = (gqlObject: void | object | GqlObject | null | undefined): gqlObject is PostQuery_post_comments => {
-  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Comment";
+export const PostComments = {
+  isComment: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is PostQuery_post_comments => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Comment" && "id" in gqlObject && "content" in gqlObject;
+  }
 };
-export const isPost = (gqlObject: void | object | GqlObject | null | undefined): gqlObject is PostQuery_post => {
-  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Post";
+export const Post = {
+  isPost: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is PostQuery_post => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Post" && "id" in gqlObject && "title" in gqlObject && "content" in gqlObject && "comments" in gqlObject;
+  }
 };

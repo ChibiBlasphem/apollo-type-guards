@@ -2,6 +2,8 @@ import { CurrentUserQuery_currentUser } from "../CurrentUserQuery.ts";
 interface GqlObject<T extends string = string> {
   __typename: T;
 }
-export const isUser = (gqlObject: void | object | GqlObject | null | undefined): gqlObject is CurrentUserQuery_currentUser => {
-  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User";
+export const CurrentUser = {
+  isUser: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is CurrentUserQuery_currentUser => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "firstname" in gqlObject && "lastname" in gqlObject;
+  }
 };
