@@ -1,0 +1,12 @@
+import { UserFragment_address, UserFragment } from "../UserFragment.ts";
+interface GqlObject<T extends string = string> {
+  __typename: T;
+}
+export const Address = {
+  isAddress: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UserFragment_address => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Address" && "id" in gqlObject && "streetNumber" in gqlObject && "streetName" in gqlObject;
+  }
+};
+export const isUserFragment = (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UserFragment => {
+  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "firstname" in gqlObject && "lastname" in gqlObject && "address" in gqlObject;
+};

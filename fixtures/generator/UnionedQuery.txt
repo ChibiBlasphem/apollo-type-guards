@@ -1,0 +1,15 @@
+import { SearchQuery_search } from "../SearchQuery.ts";
+interface GqlObject<T extends string = string> {
+  __typename: T;
+}
+export const Search = {
+  isUserOrRepository: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is SearchQuery_search => {
+    return !!gqlObject && "__typename" in gqlObject && (gqlObject.__typename === "User" || gqlObject.__typename === "Repository") && "id" in gqlObject && "name" in gqlObject;
+  },
+  isUser: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is SearchQuery_search => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "name" in gqlObject;
+  },
+  isRepository: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is SearchQuery_search => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Repository" && "id" in gqlObject && "name" in gqlObject;
+  }
+};

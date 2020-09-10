@@ -1,6 +1,7 @@
 import { parse } from '@babel/parser'
 import * as types from '@babel/types'
 import { GraphQLTypeInfo, GRAPHQL_OBJECT_PROPERTY } from './types'
+import { TypeProperties } from './types'
 
 type TSTypeDeclaration = types.TSInterfaceDeclaration | types.TSTypeAliasDeclaration
 
@@ -17,7 +18,7 @@ export const extractGraphQLTypes = (code: string): GraphQLTypeInfo[] => {
   const validDeclarations = typeDeclarations.filter(hasTypenameProperty)
 
   for (let i = 0, l = validDeclarations.length; i < l; ++i) {
-    graphqlTypeInfos.push(...transformToGraphQLTypeInfo(validDeclarations[i]))
+    graphqlTypeInfos.push(transformToGraphQLTypeInfo(validDeclarations[i]))
   }
 
   return graphqlTypeInfos
@@ -129,10 +130,37 @@ const extractTypename = (type: TSTypeDeclaration): string | string[] => {
   return typename
 }
 
-const transformToGraphQLTypeInfo = (type: TSTypeDeclaration): GraphQLTypeInfo[] => {
+const extractProperties = (type: TSTypeDeclaration): TypeProperties[] => {
+  let rawProperties: types.TSTypeElement[] = []
+  if (types.isTSInterfaceDeclaration(type)) {
+    rawProperties = type.body.body
+  } else {
+    rawProperties = (type.typeAnnotation as types.TSTypeLiteral).members
+  }
+
+  const properties = rawProperties
+    .filter(
+      prop =>
+        types.isTSPropertySignature(prop) &&
+        types.isIdentifier(prop.key) &&
+        prop.key.name !== '__typename' &&
+        !!prop.typeAnnotation
+    )
+    .map(prop => {
+      const name = ((prop as types.TSPropertySignature).key as types.Identifier).name
+      const type = ((prop as types.TSPropertySignature).typeAnnotation as types.TSTypeAnnotation)
+        .typeAnnotation
+
+      return { name, type }
+    })
+
+  return properties
+}
+
+const transformToGraphQLTypeInfo = (type: TSTypeDeclaration): GraphQLTypeInfo => {
   const typename = extractTypename(type),
-    name = type.id.name
-  return Array.isArray(typename)
-    ? typename.map(typename => ({ name, typename }))
-    : [{ name, typename }]
+    name = type.id.name,
+    properties = extractProperties(type)
+
+  return { name, typename, properties }
 }

@@ -1,0 +1,19 @@
+export type QuizzQuery_questions_corrections = {
+  __typename: 'Media'
+  filename: string
+}
+
+export type QuizzQuery_questions_statements = {
+  __typename: 'Media'
+  filename: string
+}
+
+export type QuizzQuery_questions = {
+  __typename: 'Question'
+  corrections: QuizzQuery_questions_corrections[]
+  statements: QuizzQuery_questions_statements[]
+}
+
+export type QuizzQuery = {
+  questions: QuizzQuery_questions[]
+}
