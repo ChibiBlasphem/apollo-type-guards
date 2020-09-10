@@ -22,6 +22,11 @@ const writeFile = async (filepath, contents) => {
   return await fsWriteFile(filepath, contents)
 }
 
+const PRECOMMENT = `/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.`
+
 const argv = yargs
   .option('globDir', {
     description: 'The glob to folders you want to generate type guards from',
@@ -81,7 +86,9 @@ glob(globDir + `${globDir.endsWith('/') ? '' : '/'}*.ts`, (err, matches) => {
           guards.map(async ({ filepath, guards }) => {
             const filename = basename(filepath, '.ts')
             const guardFilepath = resolve(dirname(filepath), 'guards', `${filename}.ts`)
-            return writeFile(guardFilepath, guards, { flag: '' }).then(() => {
+
+            const contents = PRECOMMENT + '\n\n' + guards
+            return writeFile(guardFilepath, contents, { flag: '' }).then(() => {
               spinner.text = `Writing guard files... ${++doneWriting}/${numberOfFileToWrite}`
             })
           })
