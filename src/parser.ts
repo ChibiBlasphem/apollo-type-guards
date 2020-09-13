@@ -1,6 +1,6 @@
 import { parse } from '@babel/parser'
 import * as types from '@babel/types'
-import { GraphQLTypeInfo, GRAPHQL_OBJECT_PROPERTY } from './types'
+import { GraphQLTypeInfo, GRAPHQL_OBJECT_PROPERTY, GraphQLTypePredicateInfo } from './types'
 import { TypeProperties } from './types'
 
 type TSTypeDeclaration = types.TSInterfaceDeclaration | types.TSTypeAliasDeclaration
@@ -18,10 +18,35 @@ export const extractGraphQLTypes = (code: string): GraphQLTypeInfo[] => {
   const validDeclarations = typeDeclarations.filter(hasTypenameProperty)
 
   for (let i = 0, l = validDeclarations.length; i < l; ++i) {
-    graphqlTypeInfos.push(transformToGraphQLTypeInfo(validDeclarations[i]))
+    const predicate = transformToGraphQLTypeInfo(validDeclarations[i])
+    const idName = extractIdName(predicate.reference)
+    const graphqlTypeInfo = graphqlTypeInfos.find(gqlInfo => gqlInfo.name === idName)
+
+    if (graphqlTypeInfo) {
+      graphqlTypeInfo.predicates.push(predicate)
+    } else {
+      graphqlTypeInfos.push({
+        name: idName,
+        predicates: [predicate],
+      })
+    }
   }
 
   return graphqlTypeInfos
+}
+
+const extractIdName = (reference: string) => {
+  const segments = reference.split('_')
+
+  const limitIndex = segments
+    .slice(1)
+    .findIndex(segment => segment.charAt(0).toUpperCase() === segment.charAt(0))
+
+  if (limitIndex === -1) {
+    return reference
+  }
+
+  return segments.slice(0, limitIndex + 1).join('_')
 }
 
 const extractNamedExports = (statements: types.Statement[]): types.ExportNamedDeclaration[] => {
@@ -157,10 +182,10 @@ const extractProperties = (type: TSTypeDeclaration): TypeProperties[] => {
   return properties
 }
 
-const transformToGraphQLTypeInfo = (type: TSTypeDeclaration): GraphQLTypeInfo => {
+const transformToGraphQLTypeInfo = (type: TSTypeDeclaration): GraphQLTypePredicateInfo => {
   const typename = extractTypename(type),
-    name = type.id.name,
+    reference = type.id.name,
     properties = extractProperties(type)
 
-  return { name, typename, properties }
+  return { reference, typename, properties }
 }

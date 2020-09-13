@@ -5,6 +5,7 @@ const userFixture = loadFixture('parser/CurrentUserQuery')
 const postFixture = loadFixture('parser/PostQuery')
 const unionedFixture = loadFixture('parser/UnionedQuery')
 const quizzFixture = loadFixture('parser/QuizzQuery')
+const unionTypesFixture = loadFixture('parser/UnionTypesQuery')
 
 const ref = (identifierName: string): t.TSTypeReference => {
   const { typeParameters: _, ...typeRef } = t.tsTypeReference(t.identifier(identifierName))
@@ -16,11 +17,16 @@ describe('extractGraphQLTypes', () => {
     expect(extractGraphQLTypes(userFixture)).toMatchObject([
       {
         name: 'CurrentUserQuery_currentUser',
-        typename: 'User',
-        properties: [
-          { name: 'id', type: t.tsStringKeyword() },
-          { name: 'firstname', type: t.tsStringKeyword() },
-          { name: 'lastname', type: t.tsStringKeyword() },
+        predicates: [
+          {
+            reference: 'CurrentUserQuery_currentUser',
+            typename: 'User',
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              { name: 'firstname', type: t.tsStringKeyword() },
+              { name: 'lastname', type: t.tsStringKeyword() },
+            ],
+          },
         ],
       },
     ])
@@ -31,22 +37,32 @@ describe('extractGraphQLTypes', () => {
     expect(extractGraphQLTypes(postFixture)).toMatchObject([
       {
         name: 'PostQuery_post_comments',
-        typename: 'Comment',
-        properties: [
-          { name: 'id', type: t.tsStringKeyword() },
-          { name: 'content', type: t.tsStringKeyword() },
+        predicates: [
+          {
+            reference: 'PostQuery_post_comments',
+            typename: 'Comment',
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              { name: 'content', type: t.tsStringKeyword() },
+            ],
+          },
         ],
       },
       {
         name: 'PostQuery_post',
-        typename: 'Post',
-        properties: [
-          { name: 'id', type: t.tsStringKeyword() },
-          { name: 'title', type: t.tsStringKeyword() },
-          { name: 'content', type: t.tsStringKeyword() },
+        predicates: [
           {
-            name: 'comments',
-            type: t.tsArrayType(typeRef as t.TSTypeReference),
+            reference: 'PostQuery_post',
+            typename: 'Post',
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              { name: 'title', type: t.tsStringKeyword() },
+              { name: 'content', type: t.tsStringKeyword() },
+              {
+                name: 'comments',
+                type: t.tsArrayType(typeRef as t.TSTypeReference),
+              },
+            ],
           },
         ],
       },
@@ -59,20 +75,35 @@ describe('extractGraphQLTypes', () => {
     expect(extractGraphQLTypes(quizzFixture)).toMatchObject([
       {
         name: 'QuizzQuery_questions_corrections',
-        typename: 'Media',
-        properties: [{ name: 'filename', type: t.tsStringKeyword() }],
+        predicates: [
+          {
+            reference: 'QuizzQuery_questions_corrections',
+            typename: 'Media',
+            properties: [{ name: 'filename', type: t.tsStringKeyword() }],
+          },
+        ],
       },
       {
         name: 'QuizzQuery_questions_statements',
-        typename: 'Media',
-        properties: [{ name: 'filename', type: t.tsStringKeyword() }],
+        predicates: [
+          {
+            reference: 'QuizzQuery_questions_statements',
+            typename: 'Media',
+            properties: [{ name: 'filename', type: t.tsStringKeyword() }],
+          },
+        ],
       },
       {
         name: 'QuizzQuery_questions',
-        typename: 'Question',
-        properties: [
-          { name: 'corrections', type: t.tsArrayType(correctionsTypeRef as t.TSTypeReference) },
-          { name: 'statements', type: t.tsArrayType(statementsTypeRef as t.TSTypeReference) },
+        predicates: [
+          {
+            reference: 'QuizzQuery_questions',
+            typename: 'Question',
+            properties: [
+              { name: 'corrections', type: t.tsArrayType(correctionsTypeRef as t.TSTypeReference) },
+              { name: 'statements', type: t.tsArrayType(statementsTypeRef as t.TSTypeReference) },
+            ],
+          },
         ],
       },
     ])
@@ -81,10 +112,48 @@ describe('extractGraphQLTypes', () => {
     expect(extractGraphQLTypes(unionedFixture)).toMatchObject([
       {
         name: 'UnionedQuery_search',
-        typename: ['User', 'Repository'],
-        properties: [
-          { name: 'id', type: t.tsStringKeyword() },
-          { name: 'name', type: t.tsStringKeyword() },
+        predicates: [
+          {
+            reference: 'UnionedQuery_search',
+            typename: ['User', 'Repository'],
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              { name: 'name', type: t.tsStringKeyword() },
+            ],
+          },
+        ],
+      },
+    ])
+  })
+  it('Should return mutiple predicates for a union types', () => {
+    expect(extractGraphQLTypes(unionTypesFixture)).toMatchObject([
+      {
+        name: 'UnionTypesQuery_currentUser',
+        predicates: [
+          {
+            reference: 'UnionTypesQuery_currentUser_User',
+            typename: 'User',
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              { name: 'displayName', type: t.tsStringKeyword() },
+              { name: 'photoURL', type: t.tsUnionType([t.tsStringKeyword(), t.tsNullKeyword()]) },
+            ],
+          },
+          {
+            reference: 'UnionTypesQuery_currentUser_AuthUser',
+            typename: 'AuthUser',
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              {
+                name: 'defaultDisplayName',
+                type: t.tsUnionType([t.tsStringKeyword(), t.tsNullKeyword()]),
+              },
+              {
+                name: 'defaultPhotoURL',
+                type: t.tsUnionType([t.tsStringKeyword(), t.tsNullKeyword()]),
+              },
+            ],
+          },
         ],
       },
     ])
