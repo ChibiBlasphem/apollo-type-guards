@@ -1,0 +1,19 @@
+export interface UnionTypesQuery_currentUser_User {
+  __typename: "User";
+  id: string;
+  displayName: string;
+  photoURL: string | null;
+}
+
+export interface UnionTypesQuery_currentUser_AuthUser {
+  __typename: "AuthUser";
+  id: string;
+  defaultDisplayName: string | null;
+  defaultPhotoURL: string | null;
+}
+
+export type UnionTypesQuery_currentUser = UnionTypesQuery_currentUser_User | UnionTypesQuery_currentUser_AuthUser;
+
+export interface UnionTypesQuery {
+  currentUser: UnionTypesQuery_currentUser;
+}

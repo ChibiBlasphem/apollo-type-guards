@@ -1,6 +1,12 @@
 import * as t from '@babel/types'
 import generate from '@babel/generator'
-import { GraphQLTypeInfo, GUARD_PARAM_NAME, GRAPHQL_OBJECT_PROPERTY } from './types'
+import {
+  GraphQLTypeInfo,
+  GUARD_PARAM_NAME,
+  GRAPHQL_OBJECT_PROPERTY,
+  GraphQLTypePredicateInfo,
+} from './types'
+import { kMaxLength } from 'buffer'
 
 const buildGuardParam = (): t.Identifier => {
   const param = t.identifier(GUARD_PARAM_NAME)
@@ -27,7 +33,10 @@ const buildTypenameCondition = (typename: string) => {
   )
 }
 
-const buildCondition = ({ typename, properties }: GraphQLTypeInfo): t.LogicalExpression => {
+const buildCondition = ({
+  typename,
+  properties,
+}: GraphQLTypePredicateInfo): t.LogicalExpression => {
   // cond: !!gqlObject
   const isDefinedExpression = t.unaryExpression(
     '!',
@@ -71,9 +80,9 @@ const buildCondition = ({ typename, properties }: GraphQLTypeInfo): t.LogicalExp
   return logicalExpression
 }
 
-const buildArrowFunction = (graphqlTypeInfo: GraphQLTypeInfo): t.ArrowFunctionExpression => {
-  const { name } = graphqlTypeInfo
-  const condition = buildCondition(graphqlTypeInfo)
+const buildArrowFunction = (predicate: GraphQLTypePredicateInfo): t.ArrowFunctionExpression => {
+  const { reference } = predicate
+  const condition = buildCondition(predicate)
 
   const arrowFunctionAst = t.arrowFunctionExpression(
     [buildGuardParam()],
@@ -82,42 +91,62 @@ const buildArrowFunction = (graphqlTypeInfo: GraphQLTypeInfo): t.ArrowFunctionEx
   arrowFunctionAst.returnType = t.tsTypeAnnotation(
     t.tsTypePredicate(
       t.identifier(GUARD_PARAM_NAME),
-      t.tsTypeAnnotation(t.tsTypeReference(t.identifier(name)))
+      t.tsTypeAnnotation(t.tsTypeReference(t.identifier(reference)))
     )
   )
 
   return arrowFunctionAst
 }
 
-const buildGuardObject = (graphqlTypeInfo: GraphQLTypeInfo): t.ObjectExpression => {
-  const { typename } = graphqlTypeInfo
-  const idName = typeof typename === 'string' ? typename : typename.join('Or')
+const buildGuardObject = (predicates: GraphQLTypePredicateInfo[]): t.ObjectExpression => {
+  const props: t.ObjectProperty[] = []
 
-  return t.objectExpression([
-    t.objectProperty(t.identifier(`is${idName}`), buildArrowFunction(graphqlTypeInfo)),
-    ...(typeof typename === 'string'
-      ? []
-      : typename.map(typename => {
-          return t.objectProperty(
-            t.identifier(`is${typename}`),
-            buildArrowFunction({ ...graphqlTypeInfo, typename })
+  for (let i = 0, l = predicates.length; i < l; ++i) {
+    const predicate = predicates[i]
+    const { typename } = predicate
+    const propName = typeof typename === 'string' ? typename : typename.join('Or')
+
+    props.push(t.objectProperty(t.identifier(`is${propName}`), buildArrowFunction(predicate)))
+    if (Array.isArray(typename)) {
+      for (let j = 0, k = typename.length; j < k; ++j) {
+        props.push(
+          t.objectProperty(
+            t.identifier(`is${typename[j]}`),
+            buildArrowFunction({ ...predicate, typename: typename[j] })
           )
-        })),
-  ])
+        )
+      }
+    }
+  }
+
+  return t.objectExpression(props)
+
+  // return t.objectExpression([
+  //   t.objectProperty(t.identifier(`is${idName}`), buildArrowFunction(graphqlTypeInfo)),
+  //   ...(typeof typename === 'string'
+  //     ? []
+  //     : typename.map(typename => {
+  //         return t.objectProperty(
+  //           t.identifier(`is${typename}`),
+  //           buildArrowFunction({ ...graphqlTypeInfo, typename })
+  //         )
+  //       })),
+  // ])
 }
 
 const buildNamedExport = (graphqlTypeInfo: GraphQLTypeInfo): t.ExportNamedDeclaration => {
-  const { name } = graphqlTypeInfo
+  const { name, predicates } = graphqlTypeInfo
   const splittedName = name.split('_')
 
   if (splittedName.length === 1) {
-    if (typeof graphqlTypeInfo.typename !== 'string') {
+    const predicate = graphqlTypeInfo.predicates[0]
+    if (graphqlTypeInfo.predicates.length > 1 || typeof predicate.typename !== 'string') {
       throw new Error('')
     }
-    const idName = `is${graphqlTypeInfo.typename}Fragment`
+    const idName = `is${predicate.typename}Fragment`
     return t.exportNamedDeclaration(
       t.variableDeclaration('const', [
-        t.variableDeclarator(t.identifier(idName), buildArrowFunction(graphqlTypeInfo)),
+        t.variableDeclarator(t.identifier(idName), buildArrowFunction(predicate)),
       ])
     )
   } else {
@@ -128,13 +157,22 @@ const buildNamedExport = (graphqlTypeInfo: GraphQLTypeInfo): t.ExportNamedDeclar
 
     return t.exportNamedDeclaration(
       t.variableDeclaration('const', [
-        t.variableDeclarator(t.identifier(idName), buildGuardObject(graphqlTypeInfo)),
+        t.variableDeclarator(t.identifier(idName), buildGuardObject(predicates)),
       ])
     )
   }
 }
 
-const buildImportDeclaration = (filename: string, names: string[]) => {
+const buildImportDeclaration = (filename: string, graphqlTypeInfos: GraphQLTypeInfo[]) => {
+  const names: string[] = []
+  for (let i = 0, l = graphqlTypeInfos.length; i < l; ++i) {
+    const graphqlTypeInfo = graphqlTypeInfos[i]
+    for (let j = 0, k = graphqlTypeInfo.predicates.length; j < k; ++j) {
+      const predicate = graphqlTypeInfo.predicates[j]
+      names.push(predicate.reference)
+    }
+  }
+
   return t.importDeclaration(
     names.map(name => t.importSpecifier(t.identifier(name), t.identifier(name))),
     t.stringLiteral(`../${filename}`)
@@ -159,10 +197,7 @@ const buildGqlObjectInterface = () => {
 
 export const generateGuards = (filename: string, graphQLTypes: GraphQLTypeInfo[]): string => {
   const guardsAst: t.Statement[] = graphQLTypes.map(buildNamedExport)
-  const importDeclaration = buildImportDeclaration(
-    filename,
-    graphQLTypes.map(g => g.name)
-  )
+  const importDeclaration = buildImportDeclaration(filename, graphQLTypes)
   const gqlInterface = buildGqlObjectInterface()
 
   guardsAst.unshift(importDeclaration, gqlInterface)
