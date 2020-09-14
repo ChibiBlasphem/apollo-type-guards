@@ -37,16 +37,14 @@ export const extractGraphQLTypes = (code: string): GraphQLTypeInfo[] => {
 
 const extractIdName = (reference: string) => {
   const segments = reference.split('_')
+  const lastSegment = segments[segments.length - 1]
+  const isLastSegmentCapitalized = lastSegment.charAt(0).toUpperCase() === lastSegment.charAt(0)
 
-  const limitIndex = segments
-    .slice(1)
-    .findIndex(segment => segment.charAt(0).toUpperCase() === segment.charAt(0))
-
-  if (limitIndex === -1) {
+  if (segments.length === 1 || !isLastSegmentCapitalized) {
     return reference
   }
 
-  return segments.slice(0, limitIndex + 1).join('_')
+  return segments.slice(0, segments.length - 1).join('_')
 }
 
 const extractNamedExports = (statements: types.Statement[]): types.ExportNamedDeclaration[] => {

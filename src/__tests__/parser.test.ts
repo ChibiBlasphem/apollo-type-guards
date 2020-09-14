@@ -128,6 +128,20 @@ describe('extractGraphQLTypes', () => {
   it('Should return mutiple predicates for a union types', () => {
     expect(extractGraphQLTypes(unionTypesFixture)).toMatchObject([
       {
+        name: 'UnionTypesQuery_currentUser_User_address',
+        predicates: [
+          {
+            reference: 'UnionTypesQuery_currentUser_User_address',
+            typename: 'Address',
+            properties: [
+              { name: 'id', type: t.tsStringKeyword() },
+              { name: 'streetNumber', type: t.tsNumberKeyword() },
+              { name: 'streetName', type: t.tsStringKeyword() },
+            ],
+          },
+        ],
+      },
+      {
         name: 'UnionTypesQuery_currentUser',
         predicates: [
           {
@@ -137,6 +151,7 @@ describe('extractGraphQLTypes', () => {
               { name: 'id', type: t.tsStringKeyword() },
               { name: 'displayName', type: t.tsStringKeyword() },
               { name: 'photoURL', type: t.tsUnionType([t.tsStringKeyword(), t.tsNullKeyword()]) },
+              { name: 'address', type: ref('UnionTypesQuery_currentUser_User_address') },
             ],
           },
           {

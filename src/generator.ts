@@ -120,18 +120,6 @@ const buildGuardObject = (predicates: GraphQLTypePredicateInfo[]): t.ObjectExpre
   }
 
   return t.objectExpression(props)
-
-  // return t.objectExpression([
-  //   t.objectProperty(t.identifier(`is${idName}`), buildArrowFunction(graphqlTypeInfo)),
-  //   ...(typeof typename === 'string'
-  //     ? []
-  //     : typename.map(typename => {
-  //         return t.objectProperty(
-  //           t.identifier(`is${typename}`),
-  //           buildArrowFunction({ ...graphqlTypeInfo, typename })
-  //         )
-  //       })),
-  // ])
 }
 
 const buildNamedExport = (graphqlTypeInfo: GraphQLTypeInfo): t.ExportNamedDeclaration => {
