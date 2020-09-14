@@ -108,6 +108,20 @@ const unionedTypenames = [
 
 const unionTypes = [
   {
+    name: 'UnionTypesQuery_currentUser_User_address',
+    predicates: [
+      {
+        reference: 'UnionTypesQuery_currentUser_User_address',
+        typename: 'Address',
+        properties: [
+          { name: 'id', type: t.tsStringKeyword() },
+          { name: 'streetNumber', type: t.tsNumberKeyword() },
+          { name: 'streetName', type: t.tsStringKeyword() },
+        ],
+      },
+    ],
+  },
+  {
     name: 'UnionTypesQuery_currentUser',
     predicates: [
       {
@@ -117,6 +131,10 @@ const unionTypes = [
           { name: 'id', type: t.tsStringKeyword() },
           { name: 'displayName', type: t.tsStringKeyword() },
           { name: 'photoURL', type: t.tsStringKeyword() },
+          {
+            name: 'address',
+            type: t.tsTypeReference(t.identifier('UnionTypesQuery_currentUser_User_address')),
+          },
         ],
       },
       {

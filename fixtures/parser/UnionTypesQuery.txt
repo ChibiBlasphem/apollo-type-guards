@@ -1,8 +1,16 @@
+export interface UnionTypesQuery_currentUser_User_address {
+  __typename: "Address"
+  id: string;
+  streetNumber: number;
+  streetName: string;
+}
+
 export interface UnionTypesQuery_currentUser_User {
   __typename: "User";
   id: string;
   displayName: string;
   photoURL: string | null;
+  address: UnionTypesQuery_currentUser_User_address;
 }
 
 export interface UnionTypesQuery_currentUser_AuthUser {

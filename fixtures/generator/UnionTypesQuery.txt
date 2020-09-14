@@ -1,10 +1,15 @@
-import { UnionTypesQuery_currentUser_User, UnionTypesQuery_currentUser_AuthUser } from "../UnionTypesQuery.ts";
+import { UnionTypesQuery_currentUser_User_address, UnionTypesQuery_currentUser_User, UnionTypesQuery_currentUser_AuthUser } from "../UnionTypesQuery.ts";
 interface GqlObject<T extends string = string> {
   __typename: T;
 }
+export const CurrentUserUserAddress = {
+  isAddress: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UnionTypesQuery_currentUser_User_address => {
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Address" && "id" in gqlObject && "streetNumber" in gqlObject && "streetName" in gqlObject;
+  }
+};
 export const CurrentUser = {
   isUser: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UnionTypesQuery_currentUser_User => {
-    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "displayName" in gqlObject && "photoURL" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "displayName" in gqlObject && "photoURL" in gqlObject && "address" in gqlObject;
   },
   isAuthUser: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UnionTypesQuery_currentUser_AuthUser => {
     return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "AuthUser" && "id" in gqlObject && "defaultDisplayName" in gqlObject && "defaultPhotoURL" in gqlObject;
