@@ -4,12 +4,12 @@ interface GqlObject<T extends string = string> {
 }
 export const Search = {
   isUserOrRepository: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is SearchQuery_search => {
-    return !!gqlObject && "__typename" in gqlObject && (gqlObject.__typename === "User" || gqlObject.__typename === "Repository") && "id" in gqlObject && "name" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && (gqlObject.__typename === "User" || gqlObject.__typename === "Repository") && "id" in gqlObject && typeof gqlObject.id === "string" && "name" in gqlObject && typeof gqlObject.name === "string";
   },
   isUser: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is SearchQuery_search => {
-    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "name" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && typeof gqlObject.id === "string" && "name" in gqlObject && typeof gqlObject.name === "string";
   },
   isRepository: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is SearchQuery_search => {
-    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Repository" && "id" in gqlObject && "name" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Repository" && "id" in gqlObject && typeof gqlObject.id === "string" && "name" in gqlObject && typeof gqlObject.name === "string";
   }
 };

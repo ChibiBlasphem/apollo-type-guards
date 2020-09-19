@@ -4,11 +4,11 @@ interface GqlObject<T extends string = string> {
 }
 export const PostComments = {
   isComment: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is PostQuery_post_comments => {
-    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Comment" && "id" in gqlObject && "content" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Comment" && "id" in gqlObject && typeof gqlObject.id === "string" && "content" in gqlObject && typeof gqlObject.content === "string";
   }
 };
 export const Post = {
   isPost: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is PostQuery_post => {
-    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Post" && "id" in gqlObject && "title" in gqlObject && "content" in gqlObject && "comments" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Post" && "id" in gqlObject && typeof gqlObject.id === "string" && "title" in gqlObject && typeof gqlObject.title === "string" && "content" in gqlObject && typeof gqlObject.content === "string" && "comments" in gqlObject && Array.isArray(gqlObject.comments);
   }
 };

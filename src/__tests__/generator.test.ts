@@ -32,7 +32,13 @@ const framgentType = [
           { name: 'id', type: t.tsStringKeyword() },
           { name: 'firstname', type: t.tsStringKeyword() },
           { name: 'lastname', type: t.tsStringKeyword() },
-          { name: 'address', type: t.tsTypeReference(t.identifier('UserFragment_address')) },
+          {
+            name: 'address',
+            type: t.tsUnionType([
+              t.tsTypeReference(t.identifier('UserFragment_address')),
+              t.tsNullKeyword(),
+            ]),
+          },
         ],
       },
     ],
