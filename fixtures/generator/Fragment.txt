@@ -4,9 +4,9 @@ interface GqlObject<T extends string = string> {
 }
 export const Address = {
   isAddress: (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UserFragment_address => {
-    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Address" && "id" in gqlObject && "streetNumber" in gqlObject && "streetName" in gqlObject;
+    return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "Address" && "id" in gqlObject && typeof gqlObject.id === "string" && "streetNumber" in gqlObject && typeof gqlObject.streetNumber === "number" && "streetName" in gqlObject && typeof gqlObject.streetName === "string";
   }
 };
 export const isUserFragment = (gqlObject: void | object | GqlObject | null | undefined): gqlObject is UserFragment => {
-  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && "firstname" in gqlObject && "lastname" in gqlObject && "address" in gqlObject;
+  return !!gqlObject && "__typename" in gqlObject && gqlObject.__typename === "User" && "id" in gqlObject && typeof gqlObject.id === "string" && "firstname" in gqlObject && typeof gqlObject.firstname === "string" && "lastname" in gqlObject && typeof gqlObject.lastname === "string" && "address" in gqlObject && (typeof gqlObject.address === "object" || gqlObject.address === null);
 };

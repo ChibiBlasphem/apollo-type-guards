@@ -5,8 +5,53 @@ import {
   GUARD_PARAM_NAME,
   GRAPHQL_OBJECT_PROPERTY,
   GraphQLTypePredicateInfo,
+  TypeProperties,
 } from './types'
-import { kMaxLength } from 'buffer'
+
+const generateTypeOf = (objExpr: t.MemberExpression, typeString: string) => {
+  return t.binaryExpression(
+    '===',
+    t.unaryExpression('typeof', objExpr),
+    t.stringLiteral(typeString)
+  )
+}
+
+const buildTypeCondition = (property: TypeProperties): t.Expression => {
+  const type = property.type
+  const objExpr = t.memberExpression(t.identifier(GUARD_PARAM_NAME), t.identifier(property.name))
+
+  switch (true) {
+    case t.isTSStringKeyword(type):
+      return generateTypeOf(objExpr, 'string')
+    case t.isTSNumberKeyword(type):
+      return generateTypeOf(objExpr, 'number')
+    case t.isTSBooleanKeyword(type):
+      return generateTypeOf(objExpr, 'boolean')
+    case t.isTSNullKeyword(type):
+      return t.binaryExpression('===', objExpr, t.nullLiteral())
+    case t.isTSTypeReference(type):
+      return generateTypeOf(objExpr, 'object')
+    case t.isTSArrayType(type):
+      return t.callExpression(t.memberExpression(t.identifier('Array'), t.identifier('isArray')), [
+        objExpr,
+      ])
+    case t.isTSUnionType(type): {
+      const types = (type as t.TSUnionType).types
+      let condition = buildTypeCondition({ ...property, type: types[0] })
+
+      for (let i = 1, l = types.length; i < l; ++i) {
+        condition = t.logicalExpression(
+          '||',
+          condition,
+          buildTypeCondition({ ...property, type: types[i] })
+        )
+      }
+      return condition
+    }
+    default:
+      throw new Error(`Invalid type found ${JSON.stringify(type)}`)
+  }
+}
 
 const buildGuardParam = (): t.Identifier => {
   const param = t.identifier(GUARD_PARAM_NAME)
@@ -72,8 +117,12 @@ const buildCondition = ({
     const property = properties[i]
     logicalExpression = t.logicalExpression(
       '&&',
-      logicalExpression,
-      t.binaryExpression('in', t.stringLiteral(property.name), t.identifier(GUARD_PARAM_NAME))
+      t.logicalExpression(
+        '&&',
+        logicalExpression,
+        t.binaryExpression('in', t.stringLiteral(property.name), t.identifier(GUARD_PARAM_NAME))
+      ),
+      buildTypeCondition(property)
     )
   }
 
