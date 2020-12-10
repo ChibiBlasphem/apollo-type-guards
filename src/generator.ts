@@ -128,10 +128,12 @@ const buildNamedExport = (graphqlTypeInfo: GraphQLTypeInfo): t.ExportNamedDeclar
 
   if (splittedName.length === 1) {
     const predicate = graphqlTypeInfo.predicates[0]
-    if (graphqlTypeInfo.predicates.length > 1 || typeof predicate.typename !== 'string') {
+    if (graphqlTypeInfo.predicates.length > 1) {
       throw new Error('')
     }
-    const idName = `is${predicate.typename}Fragment`
+    const propName =
+      typeof predicate.typename === 'string' ? predicate.typename : predicate.typename.join('Or')
+    const idName = `is${propName}Fragment`
     return t.exportNamedDeclaration(
       t.variableDeclaration('const', [
         t.variableDeclarator(t.identifier(idName), buildArrowFunction(predicate)),
