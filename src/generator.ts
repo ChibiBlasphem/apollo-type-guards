@@ -6,7 +6,6 @@ import {
   GRAPHQL_OBJECT_PROPERTY,
   GraphQLTypePredicateInfo,
 } from './types'
-import { kMaxLength } from 'buffer'
 
 const buildGuardParam = (): t.Identifier => {
   const param = t.identifier(GUARD_PARAM_NAME)
