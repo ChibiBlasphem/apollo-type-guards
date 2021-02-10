@@ -8,6 +8,7 @@ const quizzFixture = loadFixture('parser/QuizzQuery')
 const unionTypesFixture = loadFixture('parser/UnionTypesQuery')
 
 const ref = (identifierName: string): t.TSTypeReference => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { typeParameters: _, ...typeRef } = t.tsTypeReference(t.identifier(identifierName))
   return typeRef as t.TSTypeReference
 }
