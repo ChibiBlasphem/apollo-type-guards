@@ -81,6 +81,17 @@ jobs:
         paths:
         - lib
 
+  dry-release:
+    executor: node
+    steps:
+    - checkout-and-restore-cache
+    - attach_workspace:
+        at: ~/repo
+    - set-git-write-access
+    - run:
+        name: Create release
+        command: yarn semantic-release --dry-run --branch ${CIRCLE_BRANCH}
+
   release:
     executor: node
     steps:
@@ -110,6 +121,15 @@ workflows:
     - build:
         requires:
         - dependencies
+    - dry-release:
+        context: NpmReleasePublish
+        requires:
+        - unit-test
+        - lint
+        - build
+        filters:
+          branches:
+            ignore: master
     - hold-release:
         type: approval
         filters:
